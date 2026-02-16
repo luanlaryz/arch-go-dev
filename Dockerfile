@@ -20,6 +20,10 @@ RUN pacman -S --noconfirm \
     unzip \
     ripgrep \
     fd \
+    wl-clipboard \
+    xclip \
+    nodejs \
+    npm \
     tmux \
     lazygit
 
@@ -37,7 +41,10 @@ ENV PATH=$PATH:/home/dev/go/bin
 
 # Install Go tools
 RUN go install golang.org/x/tools/gopls@${GOPLS_VERSION} && \
-    go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION}
+    go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION} && \
+    go install golang.org/x/tools/cmd/goimports@latest && \
+    go install mvdan.cc/gofumpt@latest && \
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Install Oh My Zsh
 USER dev

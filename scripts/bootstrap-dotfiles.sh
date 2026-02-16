@@ -29,6 +29,8 @@ link_entry "${DOTFILES_DIR}/nvim" "${TARGET_HOME}/.config/nvim"
 
 mkdir -p "${TARGET_HOME}/workspace"
 mkdir -p "${TARGET_HOME}/.cache/go-build"
+mkdir -p "${TARGET_HOME}/.cache/nvim"
 mkdir -p "${TARGET_HOME}/go/pkg/mod"
 mkdir -p "${TARGET_HOME}/.local/share/nvim"
+mkdir -p "${TARGET_HOME}/.local/state/nvim"
 touch "${TARGET_HOME}/.zsh_history"

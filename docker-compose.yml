@@ -11,15 +11,20 @@ services:
     container_name: arch-go-dev
     volumes:
       - ./workspace:/home/dev/workspace${SELINUX_LABEL}
+      - ./dotfiles:/opt/dotfiles${SELINUX_LABEL}
       - go-mod-cache:/home/dev/go/pkg/mod
       - go-build-cache:/home/dev/.cache/go-build
       - nvim-data:/home/dev/.local/share/nvim
+      - nvim-state:/home/dev/.local/state/nvim
+      - nvim-cache:/home/dev/.cache/nvim
     tty: true
     stdin_open: true
     working_dir: /home/dev/workspace
-    command: ["sleep", "infinity"]
+    command: ["bash", "-lc", "/usr/local/bin/bootstrap-dotfiles && exec sleep infinity"]
 
 volumes:
   go-mod-cache:
   go-build-cache:
   nvim-data:
+  nvim-state:
+  nvim-cache:
