@@ -1,0 +1,20 @@
+
+services:
+  dev:
+    build:
+      context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
+    container_name: arch-go-dev
+    volumes:
+      - ./workspace:/home/dev/workspace
+      - go-mod-cache:/home/dev/go/pkg/mod
+      - home-data:/home/dev
+    tty: true
+    stdin_open: true
+    working_dir: /home/dev/workspace
+
+volumes:
+  go-mod-cache:
+  home-data:
