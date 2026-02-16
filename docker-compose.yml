@@ -6,15 +6,20 @@ services:
       args:
         UID: ${UID}
         GID: ${GID}
+        GOPLS_VERSION: ${GOPLS_VERSION:-latest}
+        DLV_VERSION: ${DLV_VERSION:-latest}
     container_name: arch-go-dev
     volumes:
-      - ./workspace:/home/dev/workspace
+      - ./workspace:/home/dev/workspace${SELINUX_LABEL}
       - go-mod-cache:/home/dev/go/pkg/mod
-      - home-data:/home/dev
+      - go-build-cache:/home/dev/.cache/go-build
+      - nvim-data:/home/dev/.local/share/nvim
     tty: true
     stdin_open: true
     working_dir: /home/dev/workspace
+    command: ["sleep", "infinity"]
 
 volumes:
   go-mod-cache:
-  home-data:
+  go-build-cache:
+  nvim-data:

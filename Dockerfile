@@ -2,6 +2,8 @@ FROM archlinux:latest
 
 ARG UID=1000
 ARG GID=1000
+ARG GOPLS_VERSION=latest
+ARG DLV_VERSION=latest
 
 # Update system
 RUN pacman -Syu --noconfirm
@@ -29,21 +31,29 @@ RUN if ! getent group ${GID} >/dev/null; then \
     echo "dev ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 
-USER dev
-WORKDIR /home/dev
-
 # Go environment
 ENV GOPATH=/home/dev/go
 ENV PATH=$PATH:/home/dev/go/bin
 
 # Install Go tools
-RUN go install golang.org/x/tools/gopls@latest && \
-    go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install golang.org/x/tools/gopls@${GOPLS_VERSION} && \
+    go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION}
 
 # Install Oh My Zsh
+USER dev
+WORKDIR /home/dev
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+USER root
+COPY dotfiles /opt/dotfiles
+COPY scripts/bootstrap-dotfiles.sh /usr/local/bin/bootstrap-dotfiles
+RUN chmod +x /usr/local/bin/bootstrap-dotfiles && \
+    chown -R ${UID}:${GID} /opt/dotfiles
+
+USER dev
+RUN /usr/local/bin/bootstrap-dotfiles
 
 # Default workdir
 WORKDIR /home/dev/workspace
 
-CMD ["zsh"]
+CMD ["sleep", "infinity"]

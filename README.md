@@ -1,13 +1,22 @@
 # Arch Go Dev Environment
 
-Ambiente de desenvolvimento com **Arch Linux + Go** usando Docker Compose, com usuário do container alinhado ao `UID/GID` do host.
+Ambiente portátil para desenvolvimento com **Arch Linux + Go + Neovim**, pensado para ser reproduzido em qualquer PC apenas com **Git + Docker**.
+
+## Objetivo do setup
+
+- Portabilidade: clonar o repositório e subir o mesmo ambiente em outra máquina.
+- Persistência versionada: configurações principais (shell, tmux, nvim) ficam no Git.
+- Persistência de performance: caches pesados ficam em volumes Docker.
 
 ## Estrutura
 
-- `Dockerfile`: imagem base Arch com ferramentas de desenvolvimento (Go, gopls, dlv, neovim, zsh etc.)
-- `docker-compose.yml`: orquestra o serviço `dev`, volumes e diretório de trabalho
-- `.env`: define `UID` e `GID` usados no build para evitar problemas de permissão
-- `workspace/`: pasta montada em `/home/dev/workspace` dentro do container
+- `Dockerfile`: imagem base Arch com ferramentas de desenvolvimento.
+- `docker-compose.yml`: serviço `dev`, mounts e volumes de cache.
+- `Makefile`: comandos para bootstrap, build e acesso ao shell.
+- `scripts/bootstrap-dotfiles.sh`: aplica dotfiles versionados de forma idempotente.
+- `dotfiles/`: configurações versionadas (`zsh`, `tmux`, `nvim`).
+- `workspace/`: diretório de trabalho montado em `/home/dev/workspace`.
+- `.env` (local) / `.env.example`: variáveis de UID/GID, SELinux e versões de ferramentas.
 
 ## Pré-requisitos
 
@@ -15,41 +24,48 @@ Ambiente de desenvolvimento com **Arch Linux + Go** usando Docker Compose, com u
 - Docker Compose (plugin `docker compose`)
 - Make
 
-## Configuração
-
-1. Ajuste `UID` e `GID` em `.env` para seu usuário local:
-
-```bash
-id -u
-id -g
-```
-
-2. Suba o ambiente:
+## Primeiro uso
 
 ```bash
 make up
-```
-
-3. Acesse o shell do container:
-
-```bash
 make shell
 ```
 
+O `make up` sempre atualiza `.env` com seu `UID/GID` local e ajusta `SELINUX_LABEL` automaticamente (`:z` quando necessário).
+
 ## Comandos Make
 
-- `make help`: lista os comandos disponíveis
-- `make build`: build da imagem
-- `make up`: sobe o ambiente em background (com build)
-- `make down`: para e remove containers/rede
-- `make restart`: reinicia o ambiente
-- `make logs`: acompanha logs do serviço `dev`
-- `make ps`: mostra status dos serviços
-- `make shell`: abre shell `zsh` no container
-- `make clean`: remove containers, rede e volumes do projeto
+- `make env`: gera/atualiza `.env` com valores da máquina local.
+- `make build`: build da imagem.
+- `make up`: sobe o ambiente em background com build.
+- `make down`: para e remove containers/rede.
+- `make restart`: reinicia o ambiente.
+- `make logs`: acompanha logs do serviço `dev`.
+- `make ps`: status dos serviços.
+- `make shell`: aplica bootstrap de dotfiles e abre `zsh`.
+- `make clean`: remove containers, rede e volumes do projeto.
 
-## Fluxo recomendado
+## Modelo de persistência
 
-1. `make up`
-2. `make shell`
-3. Trabalhe no diretório `/home/dev/workspace` (espelhado em `./workspace`)
+- Versionado no Git: `dotfiles/.zshrc`
+- Versionado no Git: `dotfiles/.tmux.conf`
+- Versionado no Git: `dotfiles/nvim/init.lua`
+- Persistido em volume Docker: `go-mod-cache` (`/home/dev/go/pkg/mod`)
+- Persistido em volume Docker: `go-build-cache` (`/home/dev/.cache/go-build`)
+- Persistido em volume Docker: `nvim-data` (`/home/dev/.local/share/nvim`)
+
+## Atualização de ferramentas Go
+
+As versões podem ser controladas no `.env`:
+
+```bash
+GOPLS_VERSION=latest
+DLV_VERSION=latest
+```
+
+Exemplo com pin:
+
+```bash
+GOPLS_VERSION=v0.16.2
+DLV_VERSION=v1.23.1
+```
